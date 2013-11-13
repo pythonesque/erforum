@@ -1,0 +1,11 @@
+<erl>
+
+out(A) ->
+    case forums:top(A) of
+        ok ->
+            forums:formupdate(A);
+        X ->
+            X
+    end.
+
+</erl>

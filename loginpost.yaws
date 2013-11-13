@@ -1,0 +1,6 @@
+<erl>
+
+out(A) ->
+    forums:loginpost(A).
+
+</erl>

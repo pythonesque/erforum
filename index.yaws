@@ -1,0 +1,26 @@
+<erl>
+
+% out(A) ->
+%   {ehtml,
+%    [{html, [],
+%      [{body, [],
+%        []}]}]}.
+
+out(A) ->
+  % forums:index(A).
+  case forums:top(A) of
+    ok ->
+      forums:index(A);
+    X ->
+      X
+  end.
+
+% out(A) ->
+%     case shopcart:top(A) of
+%         ok ->
+%             shopcart:index(A);
+%         X ->
+%             X
+%     end.
+
+</erl>
