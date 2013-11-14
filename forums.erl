@@ -61,6 +61,9 @@ init_db() ->
                         [{type, set},
                         % {disc_copies, [N1]},
                          {attributes, record_info(fields, counter)}]),
+    mnesia:create_table(post_stats,
+                        [{type, set},
+                         {attributes, record_info(fields, post_stats)}]),
     Fun = fun() -> Post = #post{id = 0, parent_id = 0},
                    mnesia:write(Post)
           end,
@@ -395,11 +398,19 @@ new_post(ParentId) ->
         NextIndex = mnesia:dirty_update_counter(counter, post, 1),
         Post = #post{id = NextIndex, parent_id = ParentId},
         mnesia:write(Post),
-        AddAncestor = fun(AncestorId, _) ->
+        UpdateStats = fun(AncestorId, _) ->
           Ancestor = #ancestor_post{id = NextIndex, ancestor_id = AncestorId},
-          mnesia:write(Ancestor)
+          mnesia:write(Ancestor),
+          case mnesia:wread({post_stats, AncestorId}) of
+            [P] ->
+                NewSize = P#post_stats.size + 1,
+                P2 = P#post_stats{max = NextIndex, size = NewSize},
+                mnesia:write(P2);
+            _ ->
+                mnesia:write(#post_stats{id = AncestorId, max = NextIndex, size = 1})
+          end
         end,
-        foldu_post(AddAncestor, ok, ParentId),
+        foldu_post(UpdateStats, ok, ParentId),
         {ok,NextIndex}
     end
   end,
